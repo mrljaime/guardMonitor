@@ -42,6 +42,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        rollCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent =  new Intent();
+                intent.setClass(me, RollCallActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
     }
 
     @Override
