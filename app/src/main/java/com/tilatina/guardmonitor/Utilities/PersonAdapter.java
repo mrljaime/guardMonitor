@@ -1,6 +1,8 @@
 package com.tilatina.guardmonitor.Utilities;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -11,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.tilatina.guardmonitor.R;
 
@@ -56,8 +59,21 @@ public class PersonAdapter extends BaseAdapter implements ListAdapter{
             row = layoutInflater.inflate(R.layout.roll_call_row, null);
         }
 
-        EditText name = (EditText) row.findViewById(R.id.personName);
+        final EditText name = (EditText) row.findViewById(R.id.personName);
         final String text = name.getText().toString();
+
+        name.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                persons.get(position).setTile(name.getText().toString());
+            }
+        });
 
 
         Button button = (Button) row.findViewById(R.id.deletePerson);

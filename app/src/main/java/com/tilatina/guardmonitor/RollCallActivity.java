@@ -18,6 +18,11 @@ import android.widget.ListView;
 import com.tilatina.guardmonitor.Utilities.Person;
 import com.tilatina.guardmonitor.Utilities.PersonAdapter;
 import com.tilatina.guardmonitor.Utilities.Preferences;
+import com.tilatina.guardmonitor.Utilities.WebService;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,10 +60,43 @@ public class RollCallActivity extends AppCompatActivity{
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                JSONArray object = getRollCallObject(persons);
+                object.toString();
+                String service = Preferences
+                        .getPreference(getSharedPreferences(Preferences.MYPREFERENCES, MODE_PRIVATE),
+                                Preferences.TOKEN, null);
+                if (null != service) {
+                    WebService.rollCallAction(RollCallActivity.this, service, object, new WebService.RollCallListener() {
+                        @Override
+                        public void onSuccess(String response) {
+                            
+                        }
+                    }, new WebService.RollCallErrorListener() {
+                        @Override
+                        public void onError(String error) {
+
+                        }
+                    });
+                }
+
             }
         });
+    }
+
+    private JSONArray getRollCallObject(ArrayList<Person> persons) {
+        JSONArray object = new JSONArray();
+        for (int i = 0; i < persons.size(); i++) {
+            Log.d(Preferences.MYPREFERENCES, persons.get(i).getTitle());
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("name", persons.get(i).getTitle());
+                object.put(jsonObject);
+            }catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return object;
     }
 
 }
