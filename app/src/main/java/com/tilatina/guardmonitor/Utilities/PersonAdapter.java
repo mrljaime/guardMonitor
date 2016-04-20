@@ -1,6 +1,8 @@
 package com.tilatina.guardmonitor.Utilities;
 
+import android.app.Activity;
 import android.content.Context;
+import android.support.design.widget.FloatingActionButton;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -50,7 +52,7 @@ public class PersonAdapter extends BaseAdapter implements ListAdapter{
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, final ViewGroup parent) {
         View row = convertView;
 
         if (row == null) {
@@ -60,7 +62,11 @@ public class PersonAdapter extends BaseAdapter implements ListAdapter{
         }
 
         final EditText name = (EditText) row.findViewById(R.id.personName);
-        final String text = name.getText().toString();
+        final FloatingActionButton sendButton =(FloatingActionButton)
+                ((Activity)context).getWindow().findViewById(R.id.fab);
+
+        sendButton.setEnabled(false);
+
 
         name.addTextChangedListener(new TextWatcher() {
             @Override
@@ -71,8 +77,10 @@ public class PersonAdapter extends BaseAdapter implements ListAdapter{
             }
             @Override
             public void afterTextChanged(Editable s) {
-                persons.get(position).setTile(name.getText().toString());
-            }
+                if (0 != name.getText().length()) {
+                    persons.get(position).setTile(name.getText().toString());
+                    sendButton.setEnabled(true);
+                }}
         });
 
 

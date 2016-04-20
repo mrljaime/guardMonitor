@@ -1,6 +1,8 @@
 package com.tilatina.guardmonitor;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.tilatina.guardmonitor.Utilities.Person;
 import com.tilatina.guardmonitor.Utilities.PersonAdapter;
@@ -32,6 +35,7 @@ public class RollCallActivity extends AppCompatActivity{
     ArrayList<Person> persons = new ArrayList<>();
     ListView listView;
     PersonAdapter personAdapter;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,25 +64,52 @@ public class RollCallActivity extends AppCompatActivity{
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONArray object = getRollCallObject(persons);
-                object.toString();
-                String service = Preferences
-                        .getPreference(getSharedPreferences(Preferences.MYPREFERENCES, MODE_PRIVATE),
-                                Preferences.TOKEN, null);
-                if (null != service) {
-                    WebService.rollCallAction(RollCallActivity.this, service, object, new WebService.RollCallListener() {
-                        @Override
-                        public void onSuccess(String response) {
-                            
-                        }
-                    }, new WebService.RollCallErrorListener() {
-                        @Override
-                        public void onError(String error) {
+                Log.d(Preferences.MYPREFERENCES, String.format("Conteo arraylist = %s", persons.size()));
+                if (0 != persons.size()) {
+                    JSONArray object = getRollCallObject(persons);
+                    object.toString();
+                    String service = Preferences
+                            .getPreference(getSharedPreferences(Preferences.MYPREFERENCES, MODE_PRIVATE),
+                                    Preferences.TOKEN, null);
+                    if (null != service) {
+                        progressDialog = new ProgressDialog(RollCallActivity.this);
+                        progressDialog.setMessage("Enviando datos");
+                        progressDialog.show();
+                        WebService.rollCallAction(RollCallActivity.this, service, object, new WebService.RollCallListener() {
+                            @Override
+                            public void onSuccess(String response) {
+                                try {
+                                    JSONObject jresponse = new JSONObject(response);
+                                    if (404 == jresponse.getInt("error")) {
+                                        Toast.makeText(RollCallActivity.this, "El número de" +
+                                                        " servicio no existe. debe ingresar nuevamente o verificarlo son su supervisor",
+                                                Toast.LENGTH_SHORT);
+                                        Preferences.deletePreference(getSharedPreferences(Preferences.MYPREFERENCES,
+                                                MODE_PRIVATE), Preferences.TOKEN);
+                                        Intent intent = new Intent();
+                                        intent.setClass(RollCallActivity.this, LoginActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                }catch (Exception e) {
 
-                        }
-                    });
+                                }
+                                progressDialog.hide();
+                                persons.clear();
+                                personAdapter.notifyDataSetChanged();
+                                Toast.makeText(RollCallActivity.this, "Datos enviados", Toast.LENGTH_SHORT).show();
+                            }
+                        }, new WebService.RollCallErrorListener() {
+                            @Override
+                            public void onError(String error) {
+                                progressDialog.hide();
+                                Toast.makeText(RollCallActivity.this, "Error de comunicaciones", Toast.LENGTH_SHORT).show();
+                            }
+                        }); 
+                    }
+                } else {
+                    Toast.makeText(RollCallActivity.this, "No se puede mandar asistencia sin capturar información.", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
     }
