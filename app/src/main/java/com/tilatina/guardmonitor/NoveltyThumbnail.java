@@ -12,13 +12,15 @@ import java.io.IOException;
  */
 public class NoveltyThumbnail {
     private Bitmap thumbnail;
+    private String path;
 
     public NoveltyThumbnail() {
 
     }
 
-    public NoveltyThumbnail(Bitmap thumbnail) {
+    public NoveltyThumbnail(Bitmap thumbnail, String path) {
         this.thumbnail = thumbnail;
+        this.path = path;
     }
 
     public NoveltyThumbnail setThumbnail(Bitmap thumbnail) {
@@ -28,6 +30,15 @@ public class NoveltyThumbnail {
 
     public Bitmap getThumbnail() {
         return thumbnail;
+    }
+
+    public NoveltyThumbnail setPath(String path) {
+        this.path = path;
+        return this;
+    }
+
+    public String getPath() {
+        return path;
     }
 
 }

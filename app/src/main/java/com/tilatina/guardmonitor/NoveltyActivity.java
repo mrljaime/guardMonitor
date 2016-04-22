@@ -1,8 +1,10 @@
 package com.tilatina.guardmonitor;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,28 +17,35 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.tilatina.guardmonitor.Utilities.Preferences;
 import com.tilatina.guardmonitor.Utilities.ThumbnailAdapter;
+import com.tilatina.guardmonitor.Utilities.WebService;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NoveltyActivity extends AppCompatActivity {
 
-    String mCurrentPhotoPath;
-    List<NoveltyThumbnail> noveltyThumbnails = new ArrayList<>();
-    ThumbnailAdapter thumbnailAdapter = new ThumbnailAdapter(noveltyThumbnails);
-    RecyclerView recyclerView;
+    Uri mCurrentPhotoPath;
+    ArrayList<NoveltyThumbnail> noveltyThumbnails = new ArrayList<>();
+    ThumbnailAdapter thumbnailAdapter;
 
 
     @Override
@@ -45,108 +54,99 @@ public class NoveltyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_novelty);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        thumbnailAdapter = new ThumbnailAdapter(this, noveltyThumbnails);
 
+        FloatingActionButton send = (FloatingActionButton) findViewById(R.id.fab);
+        final EditText description = (EditText) findViewById(R.id.noveltyText);
         final Button takePicture = (Button) findViewById(R.id.takePicture);
-        recyclerView = (RecyclerView) findViewById(R.id.thumbnailRecycler);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(thumbnailAdapter);
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new ItemListener() {
+        ListView listView = (ListView) findViewById(R.id.listViewThumbnail);
+
+        listView.setAdapter(thumbnailAdapter);
+
+        assert listView != null;
+        listView.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View view, final int position) {
-                Button deleteItem = (Button) view.findViewById(R.id.deleteThumbnail);
-
-                deleteItem.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        noveltyThumbnails.remove(position);
-                        thumbnailAdapter.notifyDataSetChanged();
-                    }
-                });
-
+            public boolean onTouch(View v, MotionEvent event) {
+                v.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
             }
-        }));
+        });
 
+
+        assert takePicture != null;
         takePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                    try {
-                        File picture = createImageFile();
-                        Uri image = Uri.fromFile(picture);
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, image);
-                    }catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    File picture = null;
+                    picture = new File(Environment.
+                            getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "foto.jpg");
+                    mCurrentPhotoPath = Uri.fromFile(picture);
+                    Log.d(Preferences.MYPREFERENCES, "Get camera intent");
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(picture));
                     startActivityForResult(takePictureIntent, 1);
                 }
             }
         });
-    }
 
-    public static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener{
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkifTextIsNull(description.getText().toString())) {
+                    Toast.makeText(NoveltyActivity.this, "Intentando mandar", Toast.LENGTH_SHORT).show();
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("description", description.getText().toString());
+                    if (noveltyThumbnails.size() != 0) {
+                        for (int i = 0; i < noveltyThumbnails.size(); i++) {
 
-        NoveltyActivity.ItemListener itemListener;
-        public RecyclerTouchListener(Context context, final RecyclerView recyclerView,
-                                     final NoveltyActivity.ItemListener itemListener) {
-            this.itemListener = itemListener;
-        }
-
-        @Override
-        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-            View child = rv.findChildViewUnder(e.getX(), e.getY());
-            if (null != child && null != itemListener) {
-                itemListener.onClick(child, rv.getChildAdapterPosition(child));
+                            Bitmap image = noveltyThumbnails.get(i).getThumbnail();
+                            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                            image.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                            WebService.uploadFile("uploadFile", noveltyThumbnails.get(i).getPath(),
+                                    null, params, new WebService.onFileUploadListener() {
+                                @Override
+                                public void fileUploaded(String response) {
+                                    Log.d(Preferences.MYPREFERENCES, "Responde :" + response);
+                                }
+                            }, new WebService.onErrorListener() {
+                                @Override
+                                public void onError() {
+                                }
+                            }, getApplicationContext());
+                        }
+                    }
+                } else {
+                    description.setError("El campo no puede estar vacío");
+                }
             }
+        });
 
-            return false;
-        }
-        @Override
-        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-        }
-        @Override
-        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-        }
     }
-
-
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            Bundle extra = data.getExtras();
-            Bitmap image = (Bitmap) extra.get("data");
-            NoveltyThumbnail thumbnail = new NoveltyThumbnail(image);
-            noveltyThumbnails.add(thumbnail);
+            Bitmap image = BitmapFactory.decodeFile(mCurrentPhotoPath.getPath());
 
+            NoveltyThumbnail noveltyThumbnail = new NoveltyThumbnail(image, mCurrentPhotoPath.getPath());
+            noveltyThumbnails.add(noveltyThumbnail);
             thumbnailAdapter.notifyDataSetChanged();
+            try {
+                Preferences.downSize(this, mCurrentPhotoPath, 50);
+            }catch(IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private File createImageFile() throws IOException{
-
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        return image;
+    private boolean checkifTextIsNull(String text) {
+        if (text.trim().length() == 0) {
+            return false;
+        }
+        return true;
     }
-
-    private interface ItemListener {
-        void onClick(View view, int position);
-    }
-
 
 }

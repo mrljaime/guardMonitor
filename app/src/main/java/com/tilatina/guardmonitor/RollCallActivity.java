@@ -3,6 +3,7 @@ package com.tilatina.guardmonitor;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -43,6 +44,13 @@ public class RollCallActivity extends AppCompatActivity{
         setContentView(R.layout.activity_roll_call);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        try {
+            LoginActivity.loginActivity.finish();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
         listView = (ListView) findViewById(R.id.rollCallRecycler);
         listView.setAdapter(personAdapter = new PersonAdapter(this, persons));
@@ -92,12 +100,25 @@ public class RollCallActivity extends AppCompatActivity{
                                         finish();
                                     }
                                 }catch (Exception e) {
-
                                 }
+                                try {
+                                    JSONObject jsonResponde = new JSONObject(response);
+                                    String date = jsonResponde.getString("nextDueDate");
+                                    if ("null" != date) {
+                                        Log.d(Preferences.MYPREFERENCES, date);
+                                        Preferences.putPreference(getSharedPreferences(Preferences.MYPREFERENCES, MODE_PRIVATE),
+                                                "date", date);
+                                        Preferences.setAlarmReceiver(getApplicationContext());
+                                    }
+                                }catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
                                 progressDialog.hide();
                                 persons.clear();
                                 personAdapter.notifyDataSetChanged();
                                 Toast.makeText(RollCallActivity.this, "Datos enviados", Toast.LENGTH_SHORT).show();
+                                finish();
                             }
                         }, new WebService.RollCallErrorListener() {
                             @Override
@@ -105,7 +126,7 @@ public class RollCallActivity extends AppCompatActivity{
                                 progressDialog.hide();
                                 Toast.makeText(RollCallActivity.this, "Error de comunicaciones", Toast.LENGTH_SHORT).show();
                             }
-                        }); 
+                        });
                     }
                 } else {
                     Toast.makeText(RollCallActivity.this, "No se puede mandar asistencia sin capturar información.", Toast.LENGTH_SHORT).show();

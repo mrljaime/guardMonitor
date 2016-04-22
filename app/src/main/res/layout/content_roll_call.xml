@@ -17,6 +17,7 @@
         android:layout_height="400dp"
         android:focusable="false"
         android:descendantFocusability="beforeDescendants"
+        android:scrollbars="none"
         android:id="@+id/rollCallRecycler">
     </ListView>
 

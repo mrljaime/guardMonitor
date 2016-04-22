@@ -2,6 +2,7 @@ package com.tilatina.guardmonitor;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -27,6 +28,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        startService(new Intent(this, ScheduleNotifierService.class));
+
+        try {
+            LoginActivity.loginActivity.finish();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
 
         final Context me = this;
         sharedPreferences = getSharedPreferences(Preferences.MYPREFERENCES, MODE_PRIVATE);
