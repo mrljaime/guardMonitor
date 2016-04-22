@@ -110,8 +110,6 @@ public class Preferences {
             String dateString = Preferences.getPreference(context.getSharedPreferences(Preferences.MYPREFERENCES, Context.MODE_PRIVATE), "date", null);
             if (null != dateString) {
                 date = simpleDateFormat.parse(dateString);
-                date.setHours(19);
-                date.setMinutes(27);
             } else {
                 if (date.getMinutes() < 30) {
                     date.setMinutes(30);
