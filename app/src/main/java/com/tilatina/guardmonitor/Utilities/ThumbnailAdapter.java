@@ -1,7 +1,9 @@
 package com.tilatina.guardmonitor.Utilities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.media.Image;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,14 +61,16 @@ public class ThumbnailAdapter extends BaseAdapter implements ListAdapter{
             Button deleteThumbnail = (Button) row.findViewById(R.id.deleteThumbnail);
             ImageView imageView = (ImageView) row.findViewById(R.id.thumbnail);
 
+            final FloatingActionButton takePicture = (FloatingActionButton)
+                    ((Activity)context).findViewById(R.id.takePicture);
             imageView.setImageBitmap(noveltyThumbnails.get(position).getThumbnail());
-
 
             deleteThumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     noveltyThumbnails.remove(position);
                     notifyDataSetChanged();
+                    takePicture.setEnabled(true);
                 }
             });
         }

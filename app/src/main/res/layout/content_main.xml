@@ -14,27 +14,28 @@
 
     <Button
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Novedad"
+        android:layout_height="100dp"
+        android:text="Asistencia"
         android:background="@color/greenForActions"
-        android:id="@+id/novelty"
+        android:id="@+id/rollCall"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="25dp" />
 
     <Button
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Asistencia"
+        android:layout_height="100dp"
+        android:text="Novedad"
         android:background="@color/greenForActions"
-        android:id="@+id/rollCall"
-        android:layout_below="@+id/novelty"
+        android:id="@+id/novelty"
+        android:layout_below="@+id/rollCall"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/novelty"
-        android:layout_alignEnd="@+id/novelty"
-        android:layout_marginTop="10dp" />
+        android:layout_alignRight="@+id/rollCall"
+        android:layout_alignEnd="@+id/rollCall"
+        android:layout_marginTop="50dp" />
 
 </RelativeLayout>

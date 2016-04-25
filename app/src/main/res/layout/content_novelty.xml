@@ -19,32 +19,43 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="10dp">
+            android:layout_height="match_parent">
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Descripcion de la novedad"
-                android:id="@+id/noveltyText" />
+                android:id="@+id/noveltyText"
+                android:layout_marginTop="25dp" />
 
-            <Button
+            <android.support.design.widget.FloatingActionButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Adjuntar fotografía"
                 android:id="@+id/takePicture"
                 android:layout_below="@+id/noveltyText"
-                android:background="@color/greenForActions"
                 android:layout_centerHorizontal="true"
-                android:paddingRight="15dp"
-                android:paddingLeft="15dp" />
+                android:src="@mipmap/camera" />
 
             <ListView
                 android:id="@+id/listViewThumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="280dp"
+                android:layout_height="150dp"
                 android:layout_below="@+id/takePicture"
                 android:layout_marginTop="10dp"></ListView>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enviar novedad"
+                android:id="@+id/sendNovelty"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/listViewThumbnail"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="25dp"
+                android:background="@color/greenForActions"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp" />
+
 
 
         </RelativeLayout>

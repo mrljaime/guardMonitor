@@ -1,6 +1,7 @@
 package com.tilatina.guardmonitor;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,21 +32,28 @@ import com.tilatina.guardmonitor.Utilities.Preferences;
 import com.tilatina.guardmonitor.Utilities.ThumbnailAdapter;
 import com.tilatina.guardmonitor.Utilities.WebService;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class NoveltyActivity extends AppCompatActivity {
 
     Uri mCurrentPhotoPath;
     ArrayList<NoveltyThumbnail> noveltyThumbnails = new ArrayList<>();
     ThumbnailAdapter thumbnailAdapter;
+    FloatingActionButton takePicture;
+    String dateString;
 
 
     @Override
@@ -56,9 +64,10 @@ public class NoveltyActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         thumbnailAdapter = new ThumbnailAdapter(this, noveltyThumbnails);
 
-        FloatingActionButton send = (FloatingActionButton) findViewById(R.id.fab);
+
+        Button send = (Button) findViewById(R.id.sendNovelty);
         final EditText description = (EditText) findViewById(R.id.noveltyText);
-        final Button takePicture = (Button) findViewById(R.id.takePicture);
+        takePicture = (FloatingActionButton) findViewById(R.id.takePicture);
         ListView listView = (ListView) findViewById(R.id.listViewThumbnail);
 
         listView.setAdapter(thumbnailAdapter);
@@ -78,11 +87,12 @@ public class NoveltyActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                dateString = getUTCDateTime();
 
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                     File picture = null;
                     picture = new File(Environment.
-                            getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "foto.jpg");
+                            getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), dateString + ".jpg");
                     mCurrentPhotoPath = Uri.fromFile(picture);
                     Log.d(Preferences.MYPREFERENCES, "Get camera intent");
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(picture));
@@ -95,10 +105,15 @@ public class NoveltyActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (checkifTextIsNull(description.getText().toString())) {
-                    Toast.makeText(NoveltyActivity.this, "Intentando mandar", Toast.LENGTH_SHORT).show();
+                    dateString = getUTCDateTime();
+                    final ProgressDialog progressDialog = new ProgressDialog(NoveltyActivity.this);
+                    progressDialog.setMessage("Enviando");
                     Map<String, String> params = new HashMap<String, String>();
-                    params.put("description", description.getText().toString());
+                    params.put("description", URLEncoder.encode(description.getText().toString()));
+                    params.put("captureDate", URLEncoder.encode(dateString));
+                    params.put("colorStatus", URLEncoder.encode("G"));
                     if (noveltyThumbnails.size() != 0) {
+                        progressDialog.show();
                         for (int i = 0; i < noveltyThumbnails.size(); i++) {
 
                             Bitmap image = noveltyThumbnails.get(i).getThumbnail();
@@ -109,13 +124,38 @@ public class NoveltyActivity extends AppCompatActivity {
                                 @Override
                                 public void fileUploaded(String response) {
                                     Log.d(Preferences.MYPREFERENCES, "Responde :" + response);
+                                    try {
+                                        JSONObject respondeObj = new JSONObject(response);
+                                        if (200 == respondeObj.getInt("code")) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    finish();
+                                                    Toast.makeText(NoveltyActivity.this, "Enviado con éxito", Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                        }
+                                    }catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }, new WebService.onErrorListener() {
                                 @Override
                                 public void onError() {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            progressDialog.hide();
+                                            Toast.makeText(NoveltyActivity.this, "Error de comunicaciones", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                                 }
                             }, getApplicationContext());
                         }
+                    } else {
+                        Toast.makeText(NoveltyActivity.this, "No puedes enviar novedad sin tomar fotografa",
+                                Toast.LENGTH_SHORT).show();
+                        return;
                     }
                 } else {
                     description.setError("El campo no puede estar vacío");
@@ -130,15 +170,17 @@ public class NoveltyActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             Bitmap image = BitmapFactory.decodeFile(mCurrentPhotoPath.getPath());
-
             NoveltyThumbnail noveltyThumbnail = new NoveltyThumbnail(image, mCurrentPhotoPath.getPath());
             noveltyThumbnails.add(noveltyThumbnail);
             thumbnailAdapter.notifyDataSetChanged();
             try {
-                Preferences.downSize(this, mCurrentPhotoPath, 50);
+                Preferences.downSize(this, mCurrentPhotoPath, 250);
             }catch(IOException e) {
                 e.printStackTrace();
             }
+
+            takePicture.setEnabled(false);
+
         }
     }
 
@@ -149,4 +191,9 @@ public class NoveltyActivity extends AppCompatActivity {
         return true;
     }
 
+    private String getUTCDateTime() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return simpleDateFormat.format(new Date());
+    }
 }

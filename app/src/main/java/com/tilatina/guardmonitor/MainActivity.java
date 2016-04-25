@@ -28,9 +28,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        startService(new Intent(this, ScheduleNotifierService.class));
+
 
         try {
+            startService(new Intent(this, ScheduleNotifierService.class));
             LoginActivity.loginActivity.finish();
         }catch (Exception e) {
             e.printStackTrace();

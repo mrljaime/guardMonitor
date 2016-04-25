@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -64,6 +65,14 @@ public class LoginActivity extends AppCompatActivity {
                                     try {
                                         JSONObject service = new JSONObject(response);
                                         if (service.getInt("id") != -1) {
+
+                                            String dateString = service.getString("nextDueDate");
+                                            if ("null" != dateString) {
+                                                Log.d(Preferences.MYPREFERENCES, dateString);
+                                                Preferences.putPreference(getSharedPreferences(Preferences.MYPREFERENCES, MODE_PRIVATE),
+                                                        "date", dateString);
+                                                Preferences.setAlarmReceiver(getApplicationContext());
+                                            }
                                             Preferences.putPreference(sharedPreferences,
                                                     Preferences.TOKEN, service.getString("id"));
                                             Intent intent = new Intent();

@@ -20,6 +20,10 @@ public class Person {
     }
 
     public String getTitle(){
-        return title;
+        if (title != null) {
+            return title;
+        } else {
+            return null;
+        }
     }
 }

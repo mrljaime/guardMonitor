@@ -35,7 +35,7 @@ public class ScheduleNotifyReceiver extends BroadcastReceiver{
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("Notificacion pendiente")
-                .setContentText("Tu proxima notificacion es " + new Date().toString())
+                .setContentText("Por favor reporta estatus a la brevedad")
                 .setContentIntent(pendingIntent)
                 ;
         notification.setVibrate(new long[] { 700, 1000, 1200});

@@ -38,6 +38,7 @@ import java.util.prefs.PreferenceChangeEvent;
  */
 public class WebService {
     private static String DEV_URL = "http://ws.tilatina.com/ws/guard";
+    //private static String DEV_URL = "http://192.168.3.46:8090/ws/guard";
 
     public interface LoginSuccessListener {
         void onSuccess(String response);
@@ -180,7 +181,11 @@ public class WebService {
 
                         // open a URL connection to the Servlet
                         FileInputStream fileInputStream = new FileInputStream(sourceFile);
-                        URL url = new URL(DEV_URL + "?" + queryString);
+                        URL url = new URL(String.format("%s/%s/noveltyMonitor?%s",
+                                DEV_URL, Preferences.getPreference(
+                                        context
+                                            .getSharedPreferences(Preferences.MYPREFERENCES, Context.MODE_PRIVATE),
+                                        Preferences.TOKEN, null), queryString));
                         Log.d("FileUploader", String.format("Uploading to %s", url.toString()));
 
                         // Open a HTTP  connection to  the URL

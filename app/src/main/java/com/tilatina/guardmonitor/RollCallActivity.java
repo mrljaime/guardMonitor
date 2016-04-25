@@ -68,13 +68,18 @@ public class RollCallActivity extends AppCompatActivity{
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(Preferences.MYPREFERENCES, String.format("Conteo arraylist = %s", persons.size()));
                 if (0 != persons.size()) {
                     JSONArray object = getRollCallObject(persons);
+                    if (null == object) {
+                        Toast.makeText(RollCallActivity.this, "No puedes mandar un campo vacío",
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     object.toString();
                     String service = Preferences
                             .getPreference(getSharedPreferences(Preferences.MYPREFERENCES, MODE_PRIVATE),
@@ -138,16 +143,19 @@ public class RollCallActivity extends AppCompatActivity{
     private JSONArray getRollCallObject(ArrayList<Person> persons) {
         JSONArray object = new JSONArray();
         for (int i = 0; i < persons.size(); i++) {
-            Log.d(Preferences.MYPREFERENCES, persons.get(i).getTitle());
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("name", persons.get(i).getTitle());
-                object.put(jsonObject);
-            }catch (JSONException e) {
-                e.printStackTrace();
+            if (persons.get(i).getTitle() == null) {
+                return null;
             }
+            Log.d(Preferences.MYPREFERENCES, String.format("%s", persons.get(i).getTitle()));
+                Log.d(Preferences.MYPREFERENCES, persons.get(i).getTitle());
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("name", persons.get(i).getTitle());
+                    object.put(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
         }
-
         return object;
     }
 

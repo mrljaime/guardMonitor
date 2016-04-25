@@ -32,7 +32,8 @@ public class Preferences {
         SharedPreferences.Editor edit = sharedPreferences.edit();
         edit.putString(key, value);
         edit.commit();
-        Log.d("JAIME...", String.format("Se ha agregado una preferencia a %s", MYPREFERENCES));
+        Log.d("JAIME...", String.format("Se ha agregado una preferencia a %s, %s, %s",
+                MYPREFERENCES, key, value));
     }
 
     public static String getPreference(SharedPreferences sharedPreferences, String key, String defaultPrefer) {
@@ -43,7 +44,7 @@ public class Preferences {
         SharedPreferences.Editor edit = sharedPreferences.edit();
         edit.remove(key);
         edit.commit();
-        Log.d("JAIME...", String.format("Se ha eliminado una preferencia a %s", MYPREFERENCES));
+        Log.d("JAIME...", String.format("Se ha eliminado una preferencia a %s, %s", MYPREFERENCES, key));
     }
 
     public static void downSize(Context context, Uri uri, int maxWidth) throws IOException{
@@ -104,10 +105,11 @@ public class Preferences {
 
     public static void setAlarmReceiver(Context context) {
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
+        String dateString = Preferences.getPreference(context.getSharedPreferences(Preferences.MYPREFERENCES, Context.MODE_PRIVATE), "date", null);
         try {
-            String dateString = Preferences.getPreference(context.getSharedPreferences(Preferences.MYPREFERENCES, Context.MODE_PRIVATE), "date", null);
+            Log.d(Preferences.MYPREFERENCES, String.format("HORA DE SERVER = %s", dateString));
             if (null != dateString) {
                 date = simpleDateFormat.parse(dateString);
             } else {
@@ -129,10 +131,11 @@ public class Preferences {
                 .getSystemService(Context.ALARM_SERVICE);
         Intent alarmReceiver = new Intent(context, ScheduleNotifyReceiver.class);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, alarmReceiver, 0);
-        //alarmManager.set(AlarmManager.RTC_WAKEUP, TIME.getTime().getTime() + 60000, sender);
-        //alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000*60*2, sender);
         alarmManager.set(AlarmManager.RTC_WAKEUP, date.getTime(), sender);
-        Preferences.deletePreference(context.getSharedPreferences(Preferences.MYPREFERENCES, Context.MODE_PRIVATE), "date");
+
+        if (new Date().after(date)) {
+            Preferences.deletePreference(context.getSharedPreferences(Preferences.MYPREFERENCES, Context.MODE_PRIVATE), "date");
+        }
     }
 
 }
