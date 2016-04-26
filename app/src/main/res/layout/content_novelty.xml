@@ -32,9 +32,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/takePicture"
+                android:src="@mipmap/camera"
                 android:layout_below="@+id/noveltyText"
-                android:layout_centerHorizontal="true"
-                android:src="@mipmap/camera" />
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="50dp" />
 
             <ListView
                 android:id="@+id/listViewThumbnail"
@@ -56,6 +58,15 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp" />
 
+            <Spinner
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/state_color"
+                android:spinnerMode="dialog"
+                android:layout_below="@+id/noveltyText"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="50dp" />
 
 
         </RelativeLayout>

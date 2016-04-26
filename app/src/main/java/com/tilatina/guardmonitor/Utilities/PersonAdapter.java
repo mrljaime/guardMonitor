@@ -62,8 +62,8 @@ public class PersonAdapter extends BaseAdapter implements ListAdapter{
         }
 
         final EditText name = (EditText) row.findViewById(R.id.personName);
-        final FloatingActionButton sendButton =(FloatingActionButton)
-                ((Activity)context).getWindow().findViewById(R.id.fab);
+        final Button sendButton =(Button)
+                ((Activity)context).getWindow().findViewById(R.id.sendRollCall);
 
         name.addTextChangedListener(new TextWatcher() {
             @Override

@@ -12,22 +12,35 @@
     tools:context="com.tilatina.guardmonitor.RollCallActivity"
     tools:showIn="@layout/activity_roll_call">
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Agregar"
+        android:id="@+id/addItem"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="360dp"
         android:focusable="false"
         android:descendantFocusability="beforeDescendants"
         android:scrollbars="none"
+        android:layout_below="@+id/addItem"
         android:id="@+id/rollCallRecycler">
     </ListView>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Agregar"
-        android:id="@+id/addItem"
+        android:text="ENVIAR ASISTENCIA"
+        android:id="@+id/sendRollCall"
         android:layout_below="@+id/rollCallRecycler"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp" />
+        android:background="@color/greenForActions"
+        android:layout_centerHorizontal="true"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:layout_marginTop="15dp" />
+
+
 </RelativeLayout>

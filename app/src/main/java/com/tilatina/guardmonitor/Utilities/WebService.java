@@ -1,6 +1,7 @@
 package com.tilatina.guardmonitor.Utilities;
 
 import android.content.Context;
+import android.graphics.LinearGradient;
 import android.media.audiofx.PresetReverb;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -57,11 +58,16 @@ public class WebService {
     }
 
     public interface onFileUploadListener {
-        void fileUploaded(String response);
+        int fileUploaded(String response);
     }
 
     public interface onErrorListener {
-        void onError();
+        int onError();
+    }
+
+    public interface sendNoveltyListener {
+        void onSuccess(String response);
+        void onError(String error);
     }
 
     public static void loginAction(Context context, final String phone, final LoginSuccessListener loginSuccessListener,
@@ -279,5 +285,38 @@ public class WebService {
             }.execute();
 
         } // End else block
+    }
+
+    public static void sendNoveltyWithOutPicture(Context context, final Map<String, String> params,
+                                                 final sendNoveltyListener sendNoveltyListener) {
+
+        String url = String.format("%s/%s/noveltyWithOutMonitor", DEV_URL,
+                Preferences.getPreference(context.getSharedPreferences(Preferences.MYPREFERENCES,
+                        Context.MODE_PRIVATE), Preferences.TOKEN, null));
+        Log.d(Preferences.MYPREFERENCES, String.format("URL = %s", url));
+
+        StringRequest sendNovelty = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(Preferences.MYPREFERENCES, response);
+                sendNoveltyListener.onSuccess(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                sendNoveltyListener.onError("Error");
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                return params;
+            }
+        };
+
+
+        sendNovelty.setRetryPolicy(new DefaultRetryPolicy(10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        Volley.newRequestQueue(context).add(sendNovelty);
+
     }
 }

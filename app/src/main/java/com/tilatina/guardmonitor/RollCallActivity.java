@@ -68,7 +68,7 @@ public class RollCallActivity extends AppCompatActivity{
             }
         });
 
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final Button fab = (Button) findViewById(R.id.sendRollCall);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
